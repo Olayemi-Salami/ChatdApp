@@ -1,19 +1,23 @@
-import PinataSDK from '@pinata/sdk';
-
-const pinata = new PinataSDK({
-  pinataApiKey: import.meta.env.VITE_PINATA_API_KEY,
-  pinataSecretApiKey: import.meta.env.VITE_PINATA_API_SECRET,
-});
-
 export async function uploadToIPFS(file: File): Promise<string> {
   try {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await pinata.pinFileToIPFS(formData, {
-      pinataMetadata: { name: file.name },
+    const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+      method: 'POST',
+      headers: {
+        pinata_api_key: import.meta.env.VITE_PINATA_API_KEY,
+        pinata_secret_api_key: import.meta.env.VITE_PINATA_API_SECRET,
+      },
+      body: formData,
     });
-    return response.IpfsHash;
+
+    if (!response.ok) {
+      throw new Error('Failed to pin file to IPFS');
+    }
+
+    const responseData = await response.json();
+    return responseData.IpfsHash;
   } catch (error) {
     console.error('IPFS upload error:', error);
     throw new Error('Failed to upload to IPFS');

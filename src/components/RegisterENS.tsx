@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useContractWrite, usePrepareContractWrite } from 'wagmi';
+import { useWriteContract } from 'wagmi';
 import { uploadToIPFS } from '../utils/ipfs';
-import RegisterABI from '../abis/Register.json';
+import { registerAbi } from '../../constants/abi';
 
 interface RegisterENSProps {
   contractAddress: string;
@@ -13,14 +13,7 @@ const RegisterENS: React.FC<RegisterENSProps> = ({ contractAddress }) => {
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState<string>('');
 
-  const { config } = usePrepareContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi: RegisterABI,
-    functionName: 'registerENS',
-    args: [ensName, name, ''],
-  });
-
-  const { writeAsync, isLoading } = useContractWrite(config);
+  const { data: hash, error: writeError, isPending: isLoading, writeContract } = useWriteContract();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +25,12 @@ const RegisterENS: React.FC<RegisterENSProps> = ({ contractAddress }) => {
 
     try {
       const ipfsHash = await uploadToIPFS(image);
-      await writeAsync?.({ args: [ensName, name, ipfsHash] });
+      writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: registerAbi,
+        functionName: 'registerENS',
+        args: [ensName, name, ipfsHash],
+      });
       setEnsName('');
       setName('');
       setImage(null);
@@ -46,6 +44,7 @@ const RegisterENS: React.FC<RegisterENSProps> = ({ contractAddress }) => {
     <div className="max-w-md mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Register ENS</h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
+      {writeError && <p className="text-red-500 mb-4">{writeError.message}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium">ENS Name (e.g., sogo.cohort13)</label>
@@ -87,6 +86,7 @@ const RegisterENS: React.FC<RegisterENSProps> = ({ contractAddress }) => {
           {isLoading ? 'Registering...' : 'Register'}
         </button>
       </form>
+      {hash && <p className="mt-4 text-green-500">Transaction sent: {hash}</p>}
     </div>
   );
 };

@@ -1,36 +1,33 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
-import { configureChains, createClient, WagmiConfig } from 'wagmi';
+import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { WagmiProvider } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
-import { publicProvider } from 'wagmi/providers/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
 import '@rainbow-me/rainbowkit/styles.css';
+import { http } from 'wagmi';
 
-const { chains, provider } = configureChains(
-  [sepolia],
-  [publicProvider()],
-);
-
-const { connectors } = getDefaultWallets({
+const config = getDefaultConfig({
   appName: 'ENS Landing Page',
-  projectId: import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID,
-  chains,
+  projectId: '0xB6F2Bd41cA5BaDC0a8e1Ed5Dd5dD44BC99fe11B0',
+  chains: [sepolia],
+  transports: {
+    [sepolia.id]: http(),
+  },
 });
 
-const wagmiClient = createClient({
-  autoConnect: true,
-  connectors,
-  provider,
-});
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains}>
-        <App />
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+          <App />
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   </React.StrictMode>,
 );

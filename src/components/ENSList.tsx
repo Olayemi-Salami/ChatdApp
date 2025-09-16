@@ -1,6 +1,6 @@
 import React from 'react';
 import { useContractRead } from 'wagmi';
-import RegisterABI from '../abis/Register.json';
+import { registerAbi } from '../../constants/abi';
 
 interface User {
   name: string;
@@ -15,7 +15,7 @@ interface ENSListProps {
 const ENSList: React.FC<ENSListProps> = ({ contractAddress }) => {
   const { data, isError, isLoading } = useContractRead({
     address: contractAddress as `0x${string}`,
-    abi: RegisterABI,
+    abi: registerAbi,
     functionName: 'getAllUsers',
   });
 
