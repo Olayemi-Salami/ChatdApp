@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, ChangeEvent, FormEvent } from "react"
+import { useState, useEffect, useRef, ChangeEvent, FormEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useWallet } from "@/hooks/useWallet"
 import { useContract } from "@/hooks/useContract"
 import { useIPFS } from "@/hooks/useIPFS"
-import { Upload, User, Globe, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import { Upload, User, Globe, ArrowLeft, CheckCircle, AlertCircle, Loader2, MessageSquare } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { 
   RegistrationProps, 
@@ -208,10 +208,21 @@ export function Registration({ onBack, onSuccess }: RegistrationProps) {
                 <p className="text-sm text-muted-foreground">Your registered name:</p>
                 <p className="text-lg font-medium">{existingENSName}</p>
               </div>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-between pt-4">
                 <Button variant="outline" onClick={onBack}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Home
+                </Button>
+                <Button 
+                  onClick={() => {
+                    // Just call onSuccess to navigate to directory
+                    // The actual chat will be started from there
+                    if (onSuccess) onSuccess();
+                  }}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Continue to Chat
+                  <MessageSquare className="w-4 h-4 ml-2" />
                 </Button>
               </div>
             </div>

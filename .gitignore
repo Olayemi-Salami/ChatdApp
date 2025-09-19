@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 .env
 .next/
+# dependencies
+/node_modules
+
+# build outputs
+.next/
+out/
+dist/

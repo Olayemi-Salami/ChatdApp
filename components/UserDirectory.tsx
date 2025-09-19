@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { UserCard } from "@/components/UserCard"
 import { useContract } from "@/hooks/useContract"
 import { useWallet } from "@/hooks/useWallet"
-import { Search, Users, ArrowLeft, RefreshCw, Filter } from "lucide-react"
+import { Search, Users, ArrowLeft, RefreshCw, Filter, MessageSquare } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { 
-  User, 
+  User as UserType,
   UserDirectoryProps, 
   UserFilter, 
   UserFilterProps, 
@@ -25,8 +25,8 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
   const { address } = useWallet()
   const { getAllRegistrations } = useContract()
 
-  const [users, setUsers] = useState<User[]>([])
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<UserType[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<UserType[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<UserFilter>("all")
@@ -62,22 +62,24 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [getAllRegistrations])
+  }, [getAllRegistrations, toast])
 
   useEffect(() => {
     console.log('useEffect triggered, calling loadUsers');
     loadUsers()
   }, [loadUsers])
 
-  // Debug effect to log state changes
+  // Debug effect to log state changes - only in development
   useEffect(() => {
-    console.log('Current state:', {
-      users,
-      filteredUsers,
-      isLoading,
-      searchQuery,
-      filter
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Current state:', {
+        users,
+        filteredUsers,
+        isLoading,
+        searchQuery,
+        filter
+      });
+    }
   }, [users, filteredUsers, isLoading, searchQuery, filter]);
 
   const applyFilters = useCallback(() => {
@@ -126,6 +128,8 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
       description: "User list has been updated",
     })
   }, [loadUsers])
+
+  // No need for a separate handleStartChat function since we can use onStartChat directly
 
   const getFilteredCount = () => {
     switch (filter) {
@@ -215,56 +219,55 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
               />
             </div>
 
-              {/* Filter Buttons */}
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setFilter("all")}
-                  className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium ${
-                    filter === "all"
-                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <Filter className="w-3.5 h-3.5 mr-1.5" />
-                  All
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilter("online")}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium ${
-                    filter === "online"
-                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Online
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilter("recent")}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium ${
-                    filter === "recent"
-                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Recent
-                </button>
-              </div>
-            </div>
-
-            {/* Stats */}
-            <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border">
-              <Badge variant="secondary" className="bg-card-foreground/10 text-card-foreground">
-                {getFilteredCount()} users found
-              </Badge>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                {filteredUsers.filter((user: any) => user.isOnline).length} online
-              </Badge>
+            {/* Filter Buttons */}
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={() => setFilter("all")}
+                className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium ${
+                  filter === "all"
+                    ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                <Filter className="w-3.5 h-3.5 mr-1.5" />
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter("online")}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+                  filter === "online"
+                    ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                Online
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter("recent")}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+                  filter === "recent"
+                    ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                Recent
+              </button>
             </div>
           </div>
-        </div>
+
+          {/* Stats */}
+          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border">
+            <Badge variant="secondary" className="bg-card-foreground/10 text-card-foreground">
+              {getFilteredCount()} users found
+            </Badge>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              {filteredUsers.filter((user: any) => user.isOnline).length} online
+            </Badge>
+          </div>
+          </div>
 
         {/* User Grid */}
         <div className="space-y-4">
@@ -342,7 +345,13 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
                         </div>
                       </div>
                       <button
-                        onClick={() => onStartChat?.(user)}
+                        onClick={(e) => {
+                          console.log('Chat button clicked for user:', user);
+                          console.log('Calling onStartChat with ensName:', user.ensName);
+                          onStartChat?.(user.ensName);
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
@@ -386,18 +395,6 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
             </CardContent>
           </Card>
         )}
-      </div>
-      
-      {/* Floating Action Button */}
-      <div className="fixed bottom-8 right-8">
-        <button
-          type="button"
-          className="inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        </button>
       </div>
     </div>
   )
