@@ -139,78 +139,118 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#1a1a1a]">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={onBack}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
+      <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onBack}
+                className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-1.5"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1.5" />
                 Back
               </Button>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary-foreground" />
+              <div className="ml-6 flex items-center">
+                <div className="flex-shrink-0 flex items-center">
+                  <Users className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h1 className="text-xl font-bold text-foreground">User Directory</h1>
+                <h1 className="ml-2.5 text-lg font-semibold text-gray-900 dark:text-white">
+                  User Directory
+                </h1>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
+            <div className="flex items-center">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh} 
+                disabled={isLoading}
+                className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-300 dark:border-gray-600"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Page Header */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Discover Users</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Find and connect with other members of the community
+          </p>
+          
+          {/* Stats */}
+          <div className="mt-4 flex items-center space-x-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+              {getFilteredCount()} users
+            </span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200">
+              {filteredUsers.filter((user: any) => user.isOnline).length} online
+            </span>
+          </div>
+        </div>
+
         {/* Search and Filters */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-card-foreground">Discover Users</CardTitle>
-            <CardDescription>Find and connect with other members of the Ambience community</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Search Input */}
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name or ENS..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+        <div className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
               </div>
+              <input
+                type="text"
+                placeholder="Search by name or ENS..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+              />
+            </div>
 
               {/* Filter Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  variant={filter === "all" ? "default" : "outline"}
-                  size="sm"
+              <div className="flex space-x-2">
+                <button
+                  type="button"
                   onClick={() => setFilter("all")}
-                  className={filter === "all" ? "bg-primary text-primary-foreground" : ""}
+                  className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium ${
+                    filter === "all"
+                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
                 >
-                  <Filter className="w-4 h-4 mr-2" />
+                  <Filter className="w-3.5 h-3.5 mr-1.5" />
                   All
-                </Button>
-                <Button
-                  variant={filter === "online" ? "default" : "outline"}
-                  size="sm"
+                </button>
+                <button
+                  type="button"
                   onClick={() => setFilter("online")}
-                  className={filter === "online" ? "bg-primary text-primary-foreground" : ""}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+                    filter === "online"
+                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
                 >
                   Online
-                </Button>
-                <Button
-                  variant={filter === "recent" ? "default" : "outline"}
-                  size="sm"
+                </button>
+                <button
+                  type="button"
                   onClick={() => setFilter("recent")}
-                  className={filter === "recent" ? "bg-primary text-primary-foreground" : ""}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+                    filter === "recent"
+                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
                 >
                   Recent
-                </Button>
+                </button>
               </div>
             </div>
 
@@ -223,61 +263,110 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
                 {filteredUsers.filter((user: any) => user.isOnline).length} online
               </Badge>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* User Grid */}
-        {isLoading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 bg-muted rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-muted rounded w-3/4" />
-                      <div className="h-3 bg-muted rounded w-1/2" />
-                      <div className="h-3 bg-muted rounded w-2/3" />
-                      <div className="h-8 bg-muted rounded w-24 mt-3" />
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="p-4 animate-pulse">
+                    <div className="flex items-center space-x-4">
+                      <div className="rounded-full bg-gray-200 dark:bg-gray-700 h-12 w-12"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex justify-end">
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : filteredUsers.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No users found</h3>
-              <p className="text-muted-foreground mb-4">
+                </div>
+              ))}
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-12 bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <Users className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-3 text-lg font-medium text-gray-900 dark:text-white">No users found</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {searchQuery
                   ? "Try adjusting your search terms or filters"
                   : "Be the first to register and start the community!"}
               </p>
               {!searchQuery && (
-                <Button onClick={onBack} variant="outline">
-                  Register Now
-                </Button>
+                <div className="mt-6">
+                  <button
+                    onClick={onBack}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Register Now
+                  </button>
+                </div>
               )}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUsers.map((user: any) => (
-              <UserCard
-                key={user.ensName}
-                ensName={user.ensName}
-                displayName={user.displayName}
-                profileImageHash={user.profileImageHash}
-                owner={user.owner}
-                registrationTime={user.registrationTime}
-                isOnline={user.isOnline}
-                onStartChat={onStartChat}
-              />
-            ))}
-          </div>
-        )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredUsers.map((user: any) => (
+                <div key={user.ensName} className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="relative">
+                          <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                            {user.profileImageHash ? (
+                              <img 
+                                src={`https://ipfs.io/ipfs/${user.profileImageHash}`} 
+                                alt={user.displayName}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30">
+                                <User className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                              </div>
+                            )}
+                          </div>
+                          {user.isOnline && (
+                            <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-800"></span>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                            {user.displayName || user.ensName}
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {user.ensName}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => onStartChat?.(user)}
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                        Chat
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      
+        {/* Floating Action Button */}
+        <div className="fixed bottom-8 right-8">
+          <button
+            type="button"
+            className="inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+        </div>
 
         {/* Current User Info */}
         {address && (
@@ -287,16 +376,28 @@ export function UserDirectory({ onBack, onStartChat }: UserDirectoryProps) {
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                   <Users className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Connected as</p>
-                  <p className="text-xs text-muted-foreground">
-                    {address.slice(0, 6)}...{address.slice(-4)}
+                <div className="text-sm">
+                  <p className="font-medium">Your Wallet</p>
+                  <p className="text-muted-foreground text-xs truncate max-w-[180px]">
+                    {`${address.substring(0, 6)}...${address.substring(address.length - 4)}`}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
+      </div>
+      
+      {/* Floating Action Button */}
+      <div className="fixed bottom-8 right-8">
+        <button
+          type="button"
+          className="inline-flex items-center p-3 border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </button>
       </div>
     </div>
   )

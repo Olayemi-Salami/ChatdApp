@@ -20,13 +20,15 @@ import {
 
 export function Registration({ onBack, onSuccess }: RegistrationProps) {
   const { address } = useWallet()
-  const { registerENS, isENSAvailable, isLoading: contractLoading } = useContract()
+  const { registerENS, isENSAvailable, getENSByAddress, isLoading: contractLoading } = useContract()
   const { uploadToIPFS, isUploading, uploadError } = useIPFS()
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     ensName: "",
     displayName: "",
   })
+  const [hasExistingProfile, setHasExistingProfile] = useState<boolean>(false)
+  const [existingENSName, setExistingENSName] = useState<string | null>(null)
   const [profileImage, setProfileImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
@@ -34,6 +36,21 @@ export function Registration({ onBack, onSuccess }: RegistrationProps) {
   const [registrationStep, setRegistrationStep] = useState<RegistrationStep>("form")
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Check if user already has a profile when the component mounts or address changes
+  useEffect(() => {
+    const checkExistingProfile = async () => {
+      if (address) {
+        const ensName = await getENSByAddress(address)
+        if (ensName) {
+          setHasExistingProfile(true)
+          setExistingENSName(ensName)
+        }
+      }
+    }
+    
+    checkExistingProfile()
+  }, [address, getENSByAddress])
 
   const handleImageSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -101,6 +118,24 @@ export function Registration({ onBack, onSuccess }: RegistrationProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    
+    if (!address) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to register an ENS name",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (hasExistingProfile && existingENSName) {
+      toast({
+        title: "Profile already exists",
+        description: `You have already registered the ENS name: ${existingENSName}. Each wallet can only have one profile.`,
+        variant: "destructive",
+      })
+      return
+    }
 
     if (!profileImage) {
       toast({
@@ -151,6 +186,40 @@ export function Registration({ onBack, onSuccess }: RegistrationProps) {
   }
 
   const isFormValid = formData.ensName.length >= 3 && formData.displayName.length >= 2 && profileImage && ensAvailable
+
+  if (hasExistingProfile && existingENSName) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+              <h1 className="text-xl font-bold text-foreground">Profile Exists</h1>
+            </div>
+            <CardDescription>
+              You have already registered an ENS name with this wallet.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">Your registered name:</p>
+                <p className="text-lg font-medium">{existingENSName}</p>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={onBack}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Home
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (registrationStep === "success") {
     return (
